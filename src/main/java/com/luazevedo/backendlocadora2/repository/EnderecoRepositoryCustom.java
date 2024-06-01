@@ -65,7 +65,25 @@ public class EnderecoRepositoryCustom {
             params.put("cep", filtro.getCep());
         }
 
+        if (!params.isEmpty()) {
+            String sql = """
+                SELECT id, rua, numero, bairro, cidade, estado, cep
+                FROM endereco
+                WHERE """ + where.toString();
+
+            return jdbcClient.sql(sql)
+                    .params(params)
+                    .query(enderecoDTOMapper)
+                    .list();
+        } else {
+            // Caso não haja filtros, retorna todos os endereços
+            String sql = "SELECT id, rua, numero, bairro, cidade, estado, cep FROM endereco";
+            return jdbcClient.sql(sql)
+                    .query(enderecoDTOMapper)
+                    .list();
+        }
     }
+
 
     public Optional<EnderecoDTO> buscarEnderecoPorId(Long idEndereco) {
         return jdbcClient

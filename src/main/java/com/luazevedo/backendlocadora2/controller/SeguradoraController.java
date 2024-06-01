@@ -25,7 +25,7 @@ public class SeguradoraController implements CrudController<Seguradora> {
     @Override
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.buscarMSeguradoraPorId(id));
+        return ResponseEntity.status(HttpStatus.OK).body(service.buscarSeguradoraPorId(id));
 
     }
 
@@ -40,7 +40,6 @@ public class SeguradoraController implements CrudController<Seguradora> {
     @Override
     @PostMapping
     public ResponseEntity<?> insert(@RequestBody Seguradora seguradora) {
-        service.salvarSeguradora(seguradora);
         return ResponseEntity.status(HttpStatus.CREATED).body("Seguradora salva com sucesso");
     }
 

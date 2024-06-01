@@ -25,7 +25,7 @@ public class CarroController implements CrudController<Carro> {
     @Override
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.obterTodosCarros());
+        return ResponseEntity.status(HttpStatus.OK).body(service.buscarCarroPorId(id));
 
     }
 

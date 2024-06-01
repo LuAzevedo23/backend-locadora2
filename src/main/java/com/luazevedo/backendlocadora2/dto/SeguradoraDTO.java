@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 public class SeguradoraDTO {
     private Long id;
+    private EnderecoDTO endereco;
     private ClienteDTO clienteDTO;
     private String nome;
     private String cnpj;

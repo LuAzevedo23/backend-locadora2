@@ -6,10 +6,10 @@ import com.luazevedo.backendlocadora2.filter.FabricanteFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.util.*;
 
 @Repository
@@ -18,91 +18,97 @@ public class FabricanteRepositoryCustom {
     @Autowired
     private JdbcClient jdbcClient;
 
-    private final RowMapper<FabricanteDTO> fabricanteDTOMapper = new FabricanteRepositoryCustom.FabricanteDTOMapper();
+    RowMapper<FabricanteDTO> fabricanteDTOMapper = (rs, rowNum) -> {
+        FabricanteDTO fabricanteDTO = new FabricanteDTO();
+        fabricanteDTO.setId(rs.getLong("id"));
+        fabricanteDTO.setFabricante_nome(rs.getString("fabricante_nome"));
+
+        return fabricanteDTO;
+    };
 
     public List<FabricanteDTO> buscarTodosFabricantes(FabricanteFilter filtro) {
         StringJoiner where = new StringJoiner(" AND ");
         Map<String, Object> params = new HashMap<>();
 
-
-        if (filtro != null) {
-            if (filtro.getFabricanteNome() != null) {
-                where.add("c.nome = :nome");
-                params.put("nome", filtro.getFabricanteNome());
-            }
+        if (filtro.getFabricanteNome() != null) {
+            where.add("fabricante_nome = :fabricanteNome");
+            params.put("fabricanteNome", filtro.getFabricanteNome());
         }
-    }
 
-    private static class FabricanteDTOMapper implements RowMapper<FabricanteDTO> {
+        String sql = """
+            SELECT id, fabricante_nome
+            FROM fabricante
+        """;
 
-        @Override
-        public FabricanteDTO mapRow(ResultSet rs, int rowNum) throws SQLException {
-            FabricanteDTO fabricanteDTO = new FabricanteDTO();
-            fabricanteDTO.setId(rs.getLong("id"));
-            fabricanteDTO.setFabricante_nome(rs.getString("nome"));
-
-            return fabricanteDTO;
+        if (!params.isEmpty()) {
+            sql += " WHERE " + where.toString();
         }
+
+        return jdbcClient.sql(sql)
+                .params(params)
+                .query(fabricanteDTOMapper)
+                .list();
     }
 
     public Optional<FabricanteDTO> buscarFabricantePorId(Long idFabricante) {
-        return jdbcClient
-                .sql("""
-                        SELECT c.*, e.id as idFabricante
-                        FROM fabricante
-                        WHERE c.id = :idFabricante
-                        """)
+        String sql = """
+            SELECT id, fabricante_nome
+            FROM fabricante
+            WHERE id = :idFabricante
+        """;
+        return jdbcClient.sql(sql)
                 .param("idFabricante", idFabricante)
                 .query(fabricanteDTOMapper)
                 .optional();
     }
 
-    public boolean checarExistenciaFabricantePorId(Long id) {
-        return jdbcClient
-                .sql("SELECT EXISTS(SELECT 1 FROM fabricante WHERE id = :idFabricante)")
-                .param("idFabricante", id)
+    public boolean checarExistenciaFabricantePorId(Long idFabricante) {
+        String sql = """
+            SELECT EXISTS(SELECT 1
+                          FROM fabricante
+                          WHERE id = :idFabricante)
+        """;
+        return jdbcClient.sql(sql)
+                .param("idFabricante", idFabricante)
                 .query(Boolean.class)
                 .single();
     }
 
     public Integer inserirFabricante(Fabricante fabricante) {
-        String sql = """
-                INSERT INTO fabricante (fabricante_nome)
-                VALUES (:fabricante_nome)
-                """;
-        Map<String, Object> params = new HashMap<>();
-        params.put("nome", fabricante.getFabricante_nome());
+        String querySql = """
+            INSERT INTO public.fabricante (fabricante_nome)
+            VALUES (:fabricanteNome)
+        """;
+        KeyHolder keyHolder = new GeneratedKeyHolder();
 
-        return jdbcClient.sql(sql)
-                .params(params)
-                .update();
+        jdbcClient.sql(querySql)
+                .param("fabricanteNome", fabricante.getFabricante_nome())
+                .update(keyHolder, "id");
+
+        return keyHolder.getKeyAs(Integer.class);
     }
 
     public Integer atualizarFabricante(Fabricante fabricante) {
-        String sql = """
-                UPDATE fabricante
-                SET nome = :fabricante_nome
-                WHERE id = :idFabricante
-                """;
-        Map<String, Object> params = new HashMap<>();
-        params.put("nome", fabricante.getFabricante_nome());
+        String querySql = """
+            UPDATE public.fabricante
+            SET fabricante_nome = :fabricanteNome
+            WHERE id = :idFabricante
+        """;
 
-        return jdbcClient.sql(sql)
-                .params(params)
+        return jdbcClient.sql(querySql)
+                .param("fabricanteNome", fabricante.getFabricante_nome())
+                .param("idFabricante", fabricante.getId())
                 .update();
-
     }
 
     public Integer deletarFabricante(Long idFabricante) {
-        String sql = "DELETE FROM fabricante WHERE id = :idFabricante";
-        Map<String, Object> params = new HashMap<>();
-        params.put("idFabricante", idFabricante);
+        String querySql = """
+            DELETE FROM public.fabricante
+            WHERE id = :idFabricante
+        """;
 
-        return jdbcClient.sql(sql)
-                .params(params)
+        return jdbcClient.sql(querySql)
+                .param("idFabricante", idFabricante)
                 .update();
-
     }
-
 }
-

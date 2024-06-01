@@ -1,7 +1,6 @@
 package com.luazevedo.backendlocadora2.service;
 
 import com.luazevedo.backendlocadora2.dto.EnderecoDTO;
-import com.luazevedo.backendlocadora2.entity.Carro;
 import com.luazevedo.backendlocadora2.entity.Endereco;
 import com.luazevedo.backendlocadora2.exception.ValorNaoExistenteNaBaseDeDadosException;
 import com.luazevedo.backendlocadora2.filter.EnderecoFilter;
@@ -24,7 +23,8 @@ public class EnderecoService {
         this.repository = repository;
         this.repositoryJdbcClient = repositoryJdbcClient;
     }
-    public Carro obterEnderecoPorId(Long idEndereco) {
+
+    public Endereco obterEnderecoPorId(Long idEndereco) {
         return repository.findById(idEndereco)
                 .orElseThrow(() -> new ValorNaoExistenteNaBaseDeDadosException(idEndereco.toString()));
     }
@@ -39,10 +39,11 @@ public class EnderecoService {
     }
 
     @Transactional
-    public EnderecoDTO inserirEndereco(Endereco endereco) {
+    public EnderecoDTO inserirEndereco (Endereco endereco) {
         validarEndereco(endereco);
         Integer idEndereco = repositoryJdbcClient.inserirEndereco(endereco);
-        return buscarEnderecoPorId(idEndereco.longValue());
+        Long idEnderecoLong = idEndereco.longValue();
+        return buscarEnderecoPorId(idEnderecoLong);
     }
 
     public void deletarEndereco(Long id) {
@@ -50,16 +51,13 @@ public class EnderecoService {
         repository.deleteById(id);
     }
 
-    @Transactional
-    public EnderecoDTO atualizarEndereco(Endereco endereco) {
+    public void atualizarEndereco(Endereco endereco) {
         validarEndereco(endereco);
-        Long idEndereco = repositoryJdbcClient.atualizarEndereco(endereco);
-        return buscarEnderecoPorId(idEndereco.longValue());
+        repositoryJdbcClient.atualizarEndereco(endereco);
     }
 
     private void checarSeExisteEndereco(Long id) {
         boolean existe = repositoryJdbcClient.checarExistenciaEnderecoPorId(id);
-
         if (!existe) {
             throw new ValorNaoExistenteNaBaseDeDadosException(id.toString());
         }
@@ -82,6 +80,4 @@ public class EnderecoService {
             throw new IllegalArgumentException("O campo 'CEP' é obrigatório.");
         }
     }
-
-
 }

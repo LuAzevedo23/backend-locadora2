@@ -12,6 +12,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import javax.management.Query;
 import java.util.*;
 
 @Repository
@@ -51,7 +52,7 @@ public class CarroRepositoryCustom {
             where.add("id_modelo_nome = :idModelo_nome");
             params.put("idModelo_nome", filtro.getIdModelo());
         }
-        if (filtro.getIdFabricante() != null){
+        if (filtro.getIdFabricante() != null) {
             where.add("id_fabricante_nome = :idFabricante_nome");
             params.put("idFabricante_nome", filtro.getIdFabricante());
         }
@@ -81,33 +82,8 @@ public class CarroRepositoryCustom {
             params.put("valorLocacao", filtro.getValorLocacao());
         }
 
-        if (!params.isEmpty()) {
-            String sql = """
-                       SELECT c.*, m.id as idModelo, m.nome, f.id as idFabricante, f.nome
-                       FROM carro c
-                       INNER JOIN modelo m ON
-                           c.id_modelo = m.id
-                       INNER JOIN fabricante f ON
-                           m.id_fabricante = f.id
-                       WHERE
-                    """ + where;
 
-            return jdbcClient.sql(sql)
-                    .params(params)
-                    .query(carroDTOMapper).list();
-        } else {
-            return jdbcClient.sql("""
-                               SELECT c.*, m.id as idModelo, m.nome, f.id as idFabricante, f.nome
-                               FROM carro c
-                               INNER JOIN modelo m ON
-                                   c.id_modelo = m.id
-                               INNER JOIN fabricante f ON
-                                   m.id_fabricante = f.id
-                            """)
-                    .query(carroDTOMapper)
-                    .list();
-        }
-    }
+}
 
     public Optional<CarroDTO> buscarCarroPorId(Long idCarro) {
         return jdbcClient

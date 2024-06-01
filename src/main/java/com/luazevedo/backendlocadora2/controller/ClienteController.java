@@ -29,7 +29,7 @@ public class ClienteController implements CrudController<Cliente> {
     @Override
     @GetMapping("/{id}")
     public ResponseEntity<?> get(@PathVariable Long id) {
-        ClienteDTO cliente = service.obterCliente(id);
+        Cliente cliente = service.obterCliente(id);
         return ResponseEntity.status(HttpStatus.OK).body(cliente);
     }
 

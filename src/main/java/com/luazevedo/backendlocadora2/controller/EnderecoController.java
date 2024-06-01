@@ -26,7 +26,7 @@ public class EnderecoController implements CrudController<Endereco> {
     @Override
     @GetMapping ("/{id}")
     public ResponseEntity<?> get(@PathVariable Long id) {
-        return ResponseEntity.status(HttpStatus.OK).body(service.obterTodosEnderecos());
+        return ResponseEntity.status(HttpStatus.OK).body(service.obterEnderecoPorId(id));
     }
 
     @Override

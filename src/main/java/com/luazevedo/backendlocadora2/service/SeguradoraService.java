@@ -25,10 +25,6 @@ public class SeguradoraService {
         this.repositoryJdbcClient = repositoryJdbcClient;
     }
 
-    public List<Seguradora> obterTodasSeguradoras() {
-        return repositoryJdbcClient.buscarTodasSeguradoras();
-    }
-
     public Seguradora obterSeguradoraPorId(Long idSeguradora) {
         return repository.findById(idSeguradora)
                 .orElseThrow(() -> new ValorNaoExistenteNaBaseDeDadosException(idSeguradora.toString()));
@@ -67,7 +63,7 @@ public class SeguradoraService {
         return repositoryJdbcClient.buscarTodasSeguradoras(filtro);
     }
 
-    public SeguradoraDTO buscarMSeguradoraPorId(Long id) {
+    public SeguradoraDTO buscarSeguradoraPorId(Long id) {
         return repositoryJdbcClient.buscarSeguradoraPorId(id)
                 .orElseThrow(() -> new ValorNaoExistenteNaBaseDeDadosException(id.toString()));
     }

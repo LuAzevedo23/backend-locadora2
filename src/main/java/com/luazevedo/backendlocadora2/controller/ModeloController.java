@@ -39,7 +39,11 @@ public class ModeloController implements CrudController<Modelo> {
     @Override
     @PostMapping
     public ResponseEntity<?> insert(@RequestBody Modelo modelo) {
-        return ResponseEntity.status(HttpStatus.CREATED).body("Modelo salvo com sucesso");
+        try {
+            return ResponseEntity.status(HttpStatus.CREATED).body("Modelo salvo com sucesso");
+        } catch (Exception ex) {
+            return ResponseEntity.internalServerError().body("Erro ao salvar Modelo: " + ex.getMessage());
+        }
     }
 
     @Override
@@ -47,8 +51,7 @@ public class ModeloController implements CrudController<Modelo> {
     public ResponseEntity<?> update(@RequestBody Modelo modelo) {
         try {
             service.atualizarModelo(modelo);
-
-            return ResponseEntity.status(HttpStatus.CREATED).body("Modelo atualizado com sucesso!");
+            return ResponseEntity.status(HttpStatus.OK).body("Modelo atualizado com sucesso!");
         } catch (Exception ex) {
             return ResponseEntity.internalServerError().body("Erro ao atualizar Modelo: " + ex.getMessage());
         }
@@ -58,10 +61,9 @@ public class ModeloController implements CrudController<Modelo> {
     public ResponseEntity<String> delete(@PathVariable Long id) {
         try {
             service.deletarModelo(id);
-
-            return ResponseEntity.status(HttpStatus.CREATED).body("Modelo excluido com sucesso!");
+            return ResponseEntity.status(HttpStatus.OK).body("Modelo excluido com sucesso!");
         } catch (Exception ex) {
-            return ResponseEntity.internalServerError().body("Erro ao excluir Modelo");
+            return ResponseEntity.internalServerError().body("Erro ao excluir Modelo: " + ex.getMessage());
         }
     }
 

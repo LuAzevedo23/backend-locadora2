@@ -2,6 +2,7 @@ package com.luazevedo.backendlocadora2.repository;
 
 import com.luazevedo.backendlocadora2.dto.ModeloDTO;
 import com.luazevedo.backendlocadora2.entity.Modelo;
+import com.luazevedo.backendlocadora2.filter.ModeloFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.jdbc.core.simple.JdbcClient;
@@ -9,8 +10,7 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Repository
 public class ModeloRepositoryCustom {
@@ -22,21 +22,35 @@ public class ModeloRepositoryCustom {
         ModeloDTO modelo = new ModeloDTO();
         modelo.setId(rs.getInt("id"));
         modelo.setModelo_nome(rs.getString("nome"));
-
         return modelo;
     };
-    public List<ModeloDTO> buscarTodosModelos(Long idFabricante) {
-        if (idFabricante <= 0) {
-            return jdbcClient
-                    .sql("SELECT m.*, f.id as id, f.nome FROM modelo m INNER JOIN fabricante f ON m.id_fabricante = f.id")
+
+    public List<ModeloDTO> buscarTodosModelos(ModeloFilter filtro) {
+        StringJoiner where = new StringJoiner(" AND ", " WHERE ", "");
+        Map<String, Object> params = new HashMap<>();
+
+        if (filtro.getId() != null) {
+            where.add("id_Modelo = :idModelo");
+            params.put("idModelo", filtro.getId());
+        }
+        if (filtro.getModeloNome() != null) {
+            where.add("modelo_nome = :modeloNome");
+            params.put("modeloNome", filtro.getModeloNome());
+        }
+
+        if (!params.isEmpty()) {
+            String sql = """
+                    SELECT m.*, f.id as idFabricante, f.nome
+                    FROM modelo m
+                    INNER JOIN fabricante f ON m.id_fabricante = f.id
+                    """ + where.toString();
+
+            return jdbcClient.sql(sql)
+                    .params(params)
                     .query(mapperModelo)
                     .list();
         } else {
-            return jdbcClient
-                    .sql("SELECT m.*, f.id as idFabricante, f.nome FROM modelo m INNER JOIN fabricante f ON m.id_fabricante = f.id WHERE m.id_fabricante = :idFabricante")
-                    .param("idFabricante", idFabricante)
-                    .query(mapperModelo)
-                    .list();
+            return Collections.emptyList();  // Retorna lista vazia se não há filtros aplicados
         }
     }
 

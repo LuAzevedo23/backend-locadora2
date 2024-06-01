@@ -41,13 +41,7 @@ public class ClienteService {
                 .orElseThrow(() -> new ValorNaoExistenteNaBaseDeDadosException(idCliente.toString()));
     }
 
-    public void inserirCliente(Long id, String nome) {
-        if (repository.existsById(id)) {
-            throw new ValorJaExistenteNaBaseDeDadosException();
-        }
-
-        Cliente cliente = new Cliente();
-        cliente.setNome(nome);
+    public void inserirCliente(Cliente cliente) {
         validarCliente(cliente);
 
         repository.save(cliente);
