@@ -74,6 +74,8 @@ public class EnderecoRepositoryAbstracao extends AbstractRepository<Endereco> {
                 .param("estado", endereco.getEstado())
                 .param("cep", endereco.getCep())
                 .update(keyHolder, "id");
+
+        return keyHolder.getKey().intValue();
     }
 
     @Override

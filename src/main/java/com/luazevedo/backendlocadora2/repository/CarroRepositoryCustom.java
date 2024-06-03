@@ -12,7 +12,6 @@ import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import javax.management.Query;
 import java.util.*;
 
 @Repository
@@ -82,8 +81,17 @@ public class CarroRepositoryCustom {
             params.put("valorLocacao", filtro.getValorLocacao());
         }
 
+        String sql = """
+                SELECT c.*, e.id as idEndereco
+                FROM cliente c
+                LEFT JOIN endereco e ON c.idEndereco = e.id
+                """ + (params.isEmpty() ? "" : " WHERE " + where);
 
-}
+        return jdbcClient.sql(sql)
+                .params(params)
+                .query(carroDTOMapper)
+                .list();
+    }
 
     public Optional<CarroDTO> buscarCarroPorId(Long idCarro) {
         return jdbcClient
